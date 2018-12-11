@@ -1,18 +1,22 @@
-# The Transformer model in Attention is all you need：a Keras implementation.
-A Keras+TensorFlow Implementation of the Transformer: "[Attention is All You Need](https://arxiv.org/abs/1706.03762)" (Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin, arxiv, 2017)
 
-# Usage
-Please refer to *en2de_main.py* and *pinyin_main.py*
-### en2de_main.py
-- This task is same as in [jadore801120/attention-is-all-you-need-pytorch](https://github.com/jadore801120/attention-is-all-you-need-pytorch): WMT'16 Multimodal Translation: Multi30k (de-en) [(http://www.statmt.org/wmt16/multimodal-task.html)](http://www.statmt.org/wmt16/multimodal-task.html). We borrowed the data proprocessing step 0 and 1 in the repository, and then construct the input file *en2de.s2s.txt*
-#### Results
-- The code achieves near results as in the repository: about 70% valid accuracy. 
-If using smaller model parameters, such as *layers=2* and *d_model=256*, the valid accuracy is better since the task is quite small.
-### For your own data
-- Just preproess your source and target sequences as the format in *en2de.s2s.txt* and *pinyin.corpus.examples.txt*.
-### Some notes
-- For larger number of layers, the special learning rate scheduler reported in the papar is necessary.
-- In *pinyin_main.py*, I tried another method to train the deep network. I train the first layer and the embedding layer first, then train a 2-layers model, and then train a 3-layers, etc. It works in this task.
+# Introducing Sparsity in the Transformer model (Keras Implementation)
 
-# Acknowledgement
-- Some model structures and some scripts are borrowed from [jadore801120/attention-is-all-you-need-pytorch](https://github.com/jadore801120/attention-is-all-you-need-pytorch).
+A proof of concept of evolutionary sparsity implementation in the Transformer:
+
+  ## Research papers:
+- **The Transformer original paper:** 
+"[Attention is All You Need](https://arxiv.org/abs/1706.03762)" (Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin, arxiv, 2017)
+- **SET-procedure original paper:**
+[Scalable training of artificial neural networks with adaptive sparse connectivity inspired by network science](https://www.nature.com/articles/s41467-018-04316-3) (Decebal Constantin Mocanu, Elena Mocanu, Peter Stone, Phuong H. Nguyen, Madeleine Gibescu & Antonio Liotta)
+
+## Code based on / uses parts of:
+- **Transformer implementation in Keras by LSdefine:** 
+[The Transformer model in Attention is all you need：a Keras implementation.](https://github.com/Lsdefine/attention-is-all-you-need-keras)
+- **Attention is all you need - A Pytroch implementation**
+[Jadore801120/attention-is-all-you-need-pytorch](https://github.com/jadore801120/attention-is-all-you-need-pytorch).
+- **Sparsity SET-procedure based on the proof-of-concept code of:** 
+[Dr. D.C. Mocanu - TU/e](https://github.com/dcmocanu/sparse-evolutionary-artificial-neural-networks/blob/master/SET-MLP-Keras-Weights-Mask/fixprob_mlp_keras_cifar10.py)
+
+  
+  
+
