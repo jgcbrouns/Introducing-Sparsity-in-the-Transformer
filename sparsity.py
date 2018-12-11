@@ -7,6 +7,8 @@ from keras import optimizers
 import numpy as np
 from keras import backend as K
 from keras.utils import np_utils
+from keras.models import load_model
+import h5py
 
 class Constraint(object):
 
@@ -75,18 +77,49 @@ def rewireMask(self,weights, noWeights, zeta):
 
     return [rewiredWeights, weightMaskCore]
 
-def weightsEvolution(self, initParams, zeta):
+
+def getSparseLayersList():
+    sparseLayersList = []
+    for i in range(0,6):
+        sparseLayersList.append('sparse_qs_'+str(i))
+        sparseLayersList.append('sparse_ks_'+str(i))
+        sparseLayersList.append('sparse_vs_'+str(i))
+    return sparseLayersList
+
+
+
+def transferModel(model, model_sparseonlycorrect, parameters, mfile, sparseLayersList):
+
+    # model refers to the old correct and complete model as gained through training in the current epoch
+    # s2s_sparseomodel_sparseonlycorrectnlycorrect refers to a new model created from scratch that only contains 
+    # correct dense encoderlayers that were set in the transformer class
+    # now we have to set the rest
+    print('Transfering model...')
+
+    count = 0
+    for layer in model_sparseonlycorrect.layers:
+        # print(layer.name+'   '+model.layers[count].name)
+        if layer.name not in sparseLayersList:
+            weightsfromlastepoch = model.layers[count].get_weights()
+            layer.set_weights(weightsfromlastepoch)
+        count = count + 1
+
+    return model_sparseonlycorrect
+
+
+
+def weightsEvolution(self, initParams, zeta, layers):
     # this represents the core of the SET procedure. It removes the weights closest to zero in each layer and add new random weights
     
     parameters = {}
     
-    #for every stacked layer
-    for i in range(6):
+    #for every stacked encoder (or decoder) layer
+    for i in range(0, layers):
 
         #w1, w2, w3
-        sparse_qs_w = self.model.get_layer("sparse_qs_"+str(i)).get_weights()
-        sparse_ks_w = self.model.get_layer("sparse_ks_"+str(i)).get_weights()
-        sparse_vs_w = self.model.get_layer("sparse_vs_"+str(i)).get_weights()
+        sparse_qs_w = self.model.get_layer('sparse_qs_'+str(i)).get_weights()
+        sparse_ks_w = self.model.get_layer('sparse_ks_'+str(i)).get_weights()
+        sparse_vs_w = self.model.get_layer('sparse_vs_'+str(i)).get_weights()
 
         noPar_sparse_qs = initParams['noPar_sparse_qs_'+str(i)]
         noPar_sparse_ks = initParams['noPar_sparse_ks_'+str(i)]
@@ -116,25 +149,23 @@ def weightsEvolution(self, initParams, zeta):
     return parameters
 
 
-
-def initSparseWeights(epsilon, n_head, d_k, d_v):
+def initSparseWeights(epsilon, n_head, d_k, d_v, layers):
 	# generate an Erdos Renyi sparse weights mask for each layer
     initParams = {}
 
-    amount_of_layers = 6
-    for i in range(amount_of_layers):
+    for i in range(0, layers):
         
         [noPar_sparse_qs, sparse_qs_wm] = createWeightsMask(epsilon,512, n_head*d_k)
         [noPar_sparse_ks, sparse_ks_wm] = createWeightsMask(epsilon,512, n_head*d_k)
         [noPar_sparse_vs, sparse_vs_wm] = createWeightsMask(epsilon,512, n_head*d_v)
 
-        initParams['noPar_sparse_qs_'+str(i)]
-        initParams['noPar_sparse_ks_'+str(i)]
-        initParams['noPar_sparse_vs_'+str(i)]
+        initParams['noPar_sparse_qs_'+str(i)] = noPar_sparse_qs
+        initParams['noPar_sparse_ks_'+str(i)] = noPar_sparse_ks
+        initParams['noPar_sparse_vs_'+str(i)] = noPar_sparse_vs
 
-        initParams['sparse_qs_wm_'+str(i)]
-        initParams['sparse_ks_wm_'+str(i)]
-        initParams['sparse_vs_wm_'+str(i)]
+        initParams['sparse_qs_wm_'+str(i)] = sparse_qs_wm
+        initParams['sparse_ks_wm_'+str(i)] = sparse_ks_wm
+        initParams['sparse_vs_wm_'+str(i)] = sparse_vs_wm
 
         initParams['sparse_qs_w_'+str(i)] = None
         initParams['sparse_ks_w_'+str(i)] = None
@@ -143,3 +174,18 @@ def initSparseWeights(epsilon, n_head, d_k, d_v):
     return initParams
 
 
+# def replace_intermediate_layer_in_keras(model, layer_id, new_layer, layer_name='NONAME'):
+#     from keras.models import Model
+
+#     layers = [l for l in model.layers]
+
+#     x = layers[0].output
+#     for i in range(1, len(layers)):
+#         print(layers[i].name)
+#         if layers[i].name == layer_name:
+#             x = new_layer(x)
+#         else:
+#             x = layers[i](x)
+
+#     new_model = Model(input=layers[0].input, output=x)
+#     return new_model

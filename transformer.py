@@ -76,22 +76,23 @@ class MultiHeadAttention():
 		if mode == 0:
 			
 			if layer_number != None:
-				qs_name = 'sparse_qs_'
-				ks_name = 'sparse_ks_'
-				vs_name = 'sparse_vs_'
+				
+			
+				qs_name = 'sparse_qs'
+				ks_name = 'sparse_ks'
+				vs_name = 'sparse_vs'
 
-				print(qs_name+'_wm')
-				qs_maskedweights = weightsForSparsity[qs_name+'_wm'+str(layer_number)]
-				ks_maskedweights = weightsForSparsity[ks_name+'_wm'+str(layer_number)]
-				vs_maskedweights = weightsForSparsity[vs_name+'_wm'+str(layer_number)]
+				qs_maskedweights = weightsForSparsity[qs_name+'_wm_'+str(layer_number)]
+				ks_maskedweights = weightsForSparsity[ks_name+'_wm_'+str(layer_number)]
+				vs_maskedweights = weightsForSparsity[vs_name+'_wm_'+str(layer_number)]
 
-				qs_weights = weightsForSparsity[qs_name+'_w'+str(layer_number)]
-				ks_weights = weightsForSparsity[ks_name+'_w'+str(layer_number)]
-				vs_weights = weightsForSparsity[vs_name+'_w'+str(layer_number)]
+				qs_weights = weightsForSparsity[qs_name+'_w_'+str(layer_number)]
+				ks_weights = weightsForSparsity[ks_name+'_w_'+str(layer_number)]
+				vs_weights = weightsForSparsity[vs_name+'_w_'+str(layer_number)]
 
-				self.qs_layer = Dense(n_head*d_k, use_bias=False, name=qs_name, kernel_constraint=MaskWeights(qs_maskedweights), weights=qs_weights)
-				self.ks_layer = Dense(n_head*d_k, use_bias=False, name=ks_name, kernel_constraint=MaskWeights(ks_maskedweights), weights=ks_weights)
-				self.vs_layer = Dense(n_head*d_v, use_bias=False, name=vs_name, kernel_constraint=MaskWeights(vs_maskedweights), weights=vs_weights)
+				self.qs_layer = Dense(n_head*d_k, use_bias=False, name=qs_name+'_'+str(layer_number), kernel_constraint=MaskWeights(qs_maskedweights), weights=qs_weights)
+				self.ks_layer = Dense(n_head*d_k, use_bias=False, name=ks_name+'_'+str(layer_number), kernel_constraint=MaskWeights(ks_maskedweights), weights=ks_weights)
+				self.vs_layer = Dense(n_head*d_v, use_bias=False, name=vs_name+'_'+str(layer_number), kernel_constraint=MaskWeights(vs_maskedweights), weights=vs_weights)
 			
 			else: 
 				self.qs_layer = Dense(n_head*d_k, use_bias=False)
@@ -270,8 +271,11 @@ class Transformer:
 		self.decode_model = None
 		d_emb = d_model
 
+		# pos_emb = Embedding(len_limit, d_emb, trainable=False, \
+		# 				   weights=[GetPosEncodingMatrix(len_limit, d_emb)])
+
 		pos_emb = Embedding(len_limit, d_emb, trainable=False, \
-						   weights=[GetPosEncodingMatrix(len_limit, d_emb)])
+					weights=[GetPosEncodingMatrix(len_limit, d_emb)])
 
 		i_word_emb = Embedding(i_tokens.num(), d_emb)
 		if share_word_emb: 
