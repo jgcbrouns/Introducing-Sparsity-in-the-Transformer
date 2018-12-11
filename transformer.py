@@ -65,7 +65,6 @@ class MaskWeights(Constraint):
 
 class MultiHeadAttention():
 
-
 	# mode 0 - big martixes, faster; mode 1 - more clear implementation
 	def __init__(self, n_head, d_model, d_k, d_v, dropout, mode=0, use_norm=True, layer_number = None, weightsForSparsity = None):
 		self.mode = mode
@@ -76,19 +75,19 @@ class MultiHeadAttention():
 		
 		if mode == 0:
 			
-			if layer_number != None and layer_number==0:
-				qs_name = 'sparse_qs_'+str(layer_number)
-				ks_name = 'sparse_ks_'+str(layer_number)
-				vs_name = 'sparse_vs_'+str(layer_number)
+			if layer_number != None:
+				qs_name = 'sparse_qs_'
+				ks_name = 'sparse_ks_'
+				vs_name = 'sparse_vs_'
 
 				print(qs_name+'_wm')
-				qs_maskedweights = weightsForSparsity[qs_name+'_wm']
-				ks_maskedweights = weightsForSparsity[ks_name+'_wm']
-				vs_maskedweights = weightsForSparsity[vs_name+'_wm']
+				qs_maskedweights = weightsForSparsity[qs_name+'_wm'+str(layer_number)]
+				ks_maskedweights = weightsForSparsity[ks_name+'_wm'+str(layer_number)]
+				vs_maskedweights = weightsForSparsity[vs_name+'_wm'+str(layer_number)]
 
-				qs_weights = weightsForSparsity[qs_name+'_w']
-				ks_weights = weightsForSparsity[ks_name+'_w']
-				vs_weights = weightsForSparsity[vs_name+'_w']
+				qs_weights = weightsForSparsity[qs_name+'_w'+str(layer_number)]
+				ks_weights = weightsForSparsity[ks_name+'_w'+str(layer_number)]
+				vs_weights = weightsForSparsity[vs_name+'_w'+str(layer_number)]
 
 				self.qs_layer = Dense(n_head*d_k, use_bias=False, name=qs_name, kernel_constraint=MaskWeights(qs_maskedweights), weights=qs_weights)
 				self.ks_layer = Dense(n_head*d_k, use_bias=False, name=ks_name, kernel_constraint=MaskWeights(ks_maskedweights), weights=ks_weights)
@@ -516,9 +515,6 @@ class QANet_Encoder:
 if __name__ == '__main__':
 	itokens = TokenList(list('0123456789'))
 	otokens = TokenList(list('0123456789abcdefx'))
-
-
-
 
 	def GenSample():
 		x = random.randint(0, 99999)

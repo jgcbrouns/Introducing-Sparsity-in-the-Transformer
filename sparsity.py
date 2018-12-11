@@ -1,5 +1,3 @@
-#sudo ssh -i ~/.ssh/google_compute_engine jeroenbrouns@104.199.49.176
-
 from __future__ import division
 from __future__ import print_function
 from keras.preprocessing.image import ImageDataGenerator
@@ -80,55 +78,68 @@ def rewireMask(self,weights, noWeights, zeta):
 def weightsEvolution(self, initParams, zeta):
     # this represents the core of the SET procedure. It removes the weights closest to zero in each layer and add new random weights
     
-    #w1, w2, w3
-    sparse_qs_0_w = self.model.get_layer("sparse_qs_0").get_weights()
-    sparse_ks_0_w = self.model.get_layer("sparse_ks_0").get_weights()
-    sparse_vs_0_w = self.model.get_layer("sparse_vs_0").get_weights()
+    parameters = {}
+    
+    #for every stacked layer
+    for i in range(6):
 
-    noPar_sparse_qs_0 = initParams['noPar_sparse_qs_0']
-    noPar_sparse_ks_0 = initParams['noPar_sparse_ks_0']
-    noPar_sparse_vs_0 = initParams['noPar_sparse_vs_0']
+        #w1, w2, w3
+        sparse_qs_w = self.model.get_layer("sparse_qs_"+str(i)).get_weights()
+        sparse_ks_w = self.model.get_layer("sparse_ks_"+str(i)).get_weights()
+        sparse_vs_w = self.model.get_layer("sparse_vs_"+str(i)).get_weights()
 
-    #wm1, wm1core
-    [sparse_qs_0_wm, sparse_qs_0_wCore] = rewireMask(self, sparse_qs_0_w[0], noPar_sparse_qs_0, zeta=zeta)
-    [sparse_ks_0_wm, sparse_ks_0_wCore] = rewireMask(self, sparse_ks_0_w[0], noPar_sparse_ks_0, zeta=zeta)
-    [sparse_vs_0_wm, sparse_vs_0_wCore] = rewireMask(self, sparse_vs_0_w[0], noPar_sparse_vs_0, zeta=zeta)
+        noPar_sparse_qs = initParams['noPar_sparse_qs_'+str(i)]
+        noPar_sparse_ks = initParams['noPar_sparse_ks_'+str(i)]
+        noPar_sparse_vs = initParams['noPar_sparse_vs_'+str(i)]
 
-    sparse_qs_0_w[0] = sparse_qs_0_w[0] * sparse_qs_0_wCore
-    sparse_ks_0_w[0] = sparse_ks_0_w[0] * sparse_ks_0_wCore
-    sparse_vs_0_w[0] = sparse_vs_0_w[0] * sparse_vs_0_wCore
+        #wm1, wm1core
+        [sparse_qs_wm, sparse_qs_wCore] = rewireMask(self, sparse_qs_w[0], noPar_sparse_qs, zeta=zeta)
+        [sparse_ks_wm, sparse_ks_wCore] = rewireMask(self, sparse_ks_w[0], noPar_sparse_ks, zeta=zeta)
+        [sparse_vs_wm, sparse_vs_wCore] = rewireMask(self, sparse_vs_w[0], noPar_sparse_vs, zeta=zeta)
 
-    parameters = {
-		'noPar_sparse_qs_0' : noPar_sparse_qs_0,
-		'noPar_sparse_ks_0' : noPar_sparse_ks_0,
-		'noPar_sparse_vs_0' : noPar_sparse_vs_0,
-		'sparse_qs_0_wm' : sparse_qs_0_wm,
-		'sparse_ks_0_wm' : sparse_ks_0_wm,
-		'sparse_vs_0_wm' : sparse_vs_0_wm,
-		'sparse_qs_0_w' : sparse_qs_0_w,
-		'sparse_ks_0_w' : sparse_ks_0_w,
-		'sparse_vs_0_w' : sparse_vs_0_w
-	}
+        sparse_qs_w[0] = sparse_qs_w[0] * sparse_qs_wCore
+        sparse_ks_w[0] = sparse_ks_w[0] * sparse_ks_wCore
+        sparse_vs_w[0] = sparse_vs_w[0] * sparse_vs_wCore
 
-    return parameters; 
+        parameters['noPar_sparse_qs_'+str(i)] = noPar_sparse_qs
+        parameters['noPar_sparse_ks_'+str(i)] = noPar_sparse_ks
+        parameters['noPar_sparse_vs_'+str(i)] = noPar_sparse_vs
+
+        parameters['sparse_qs_wm_'+str(i)] = sparse_qs_wm
+        parameters['sparse_ks_wm_'+str(i)] = sparse_ks_wm
+        parameters['sparse_vs_wm_'+str(i)] = sparse_vs_wm
+
+        parameters['sparse_qs_w_'+str(i)] = sparse_qs_w
+        parameters['sparse_ks_w_'+str(i)] = sparse_ks_w
+        parameters['sparse_vs_w_'+str(i)] = sparse_vs_w
+
+    return parameters
+
 
 
 def initSparseWeights(epsilon, n_head, d_k, d_v):
 	# generate an Erdos Renyi sparse weights mask for each layer
-	[noPar_sparse_qs_0, sparse_qs_0_wm] = createWeightsMask(epsilon,512, n_head*d_k)
-	[noPar_sparse_ks_0, sparse_ks_0_wm] = createWeightsMask(epsilon,512, n_head*d_k)
-	[noPar_sparse_vs_0, sparse_vs_0_wm] = createWeightsMask(epsilon,512, n_head*d_v)
+    initParams = {}
 
-	initParams = {
-		'noPar_sparse_qs_0' : noPar_sparse_qs_0,
-		'noPar_sparse_ks_0' : noPar_sparse_ks_0,
-		'noPar_sparse_vs_0' : noPar_sparse_vs_0,
-		'sparse_qs_0_wm' : sparse_qs_0_wm,
-		'sparse_ks_0_wm' : sparse_ks_0_wm,
-		'sparse_vs_0_wm' : sparse_vs_0_wm,
-		'sparse_qs_0_w' : None,
-		'sparse_ks_0_w' : None,
-		'sparse_vs_0_w' : None
-	}
+    amount_of_layers = 6
+    for i in range(amount_of_layers):
+        
+        [noPar_sparse_qs, sparse_qs_wm] = createWeightsMask(epsilon,512, n_head*d_k)
+        [noPar_sparse_ks, sparse_ks_wm] = createWeightsMask(epsilon,512, n_head*d_k)
+        [noPar_sparse_vs, sparse_vs_wm] = createWeightsMask(epsilon,512, n_head*d_v)
 
-	return initParams
+        initParams['noPar_sparse_qs_'+str(i)]
+        initParams['noPar_sparse_ks_'+str(i)]
+        initParams['noPar_sparse_vs_'+str(i)]
+
+        initParams['sparse_qs_wm_'+str(i)]
+        initParams['sparse_ks_wm_'+str(i)]
+        initParams['sparse_vs_wm_'+str(i)]
+
+        initParams['sparse_qs_w_'+str(i)] = None
+        initParams['sparse_ks_w_'+str(i)] = None
+        initParams['sparse_vs_w_'+str(i)] = None
+        
+    return initParams
+
+

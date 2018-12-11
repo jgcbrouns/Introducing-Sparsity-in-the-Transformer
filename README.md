@@ -17,6 +17,9 @@ A proof of concept implementation of evolutionary sparsity in the Transformer mo
 - **Sparsity SET-procedure based on the proof-of-concept code of:**   
 [Dr. D.C. Mocanu - TU/e](https://github.com/dcmocanu/sparse-evolutionary-artificial-neural-networks/blob/master/SET-MLP-Keras-Weights-Mask/fixprob_mlp_keras_cifar10.py)
 
+## F.A.Q
+- The test sys argument gives me error: UnicodeEncodeError: 'ascii' codec can't encode character '\xe4' in position 6: ordinal not in range(128)
+Solution: run in terminal: 'export LC_CTYPE=C.UTF-8'
   
   
 
