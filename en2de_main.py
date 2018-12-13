@@ -71,7 +71,7 @@ if 'sparse' in sys.argv:
 			s2s_sparseonlycorrect = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
 						n_head=8, d_k=64, d_v=64, layers=layers, dropout=0.1, weightsForSparsity=parameters)
 			# compile the model
-			s2s_sparseonlycorrect.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
+			s2s_sparseonlycorrect.compile(adam)
 			
 			# get the list of layers to ignore
 			sparseLayersList = getSparseLayersList()
@@ -97,10 +97,7 @@ if 'sparse' in sys.argv:
 			s2s_new = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
 						n_head=8, d_k=64, d_v=64, layers=layers, dropout=0.1)
 			# compile the model
-			s2s_new.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
-			
-			# get the list of layers to ignore
-			sparseLayersList = getSparseLayersList()
+			s2s_new.compile(adam)
 
 			# transfer into new model, which is in this case an empty Transformer model to proof transfer correctness
 			s2s.model = transferModel(model_old=s2s.model, model_new=s2s_new.model)
