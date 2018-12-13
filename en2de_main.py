@@ -4,7 +4,7 @@ from keras.optimizers import *
 from keras.callbacks import *
 from sparsity import *
 from keras import backend as K
-
+from transfer_model import transferModel
 
 if 'testdata' in sys.argv:
 	itokens, otokens = dd.MakeS2SDict('data/test_subset/en2de.s2s.txt', dict_file='data/test_subset/en2de_word.txt')
@@ -38,6 +38,9 @@ if 'sparse' in sys.argv:
 	s2s = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
 				   n_head=8, d_k=64, d_v=64, layers=2, dropout=0.1, weightsForSparsity=initParams)
 	
+	#compile the model
+	s2s.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
+	
 	mfile = 'models/en2de.model.h5'
 
 	################ callbacks ################
@@ -45,26 +48,22 @@ if 'sparse' in sys.argv:
 	lr_scheduler = LRSchedulerPerEpoch(d_model, 4000, Xtrain.shape[0]/64)  # this scheduler only update lr per epoch
 	model_saver = ModelCheckpoint(mfile, save_best_only=True, save_weights_only=True)
 	###########################################
-
-	#compile the model
-	s2s.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
 	
 	if 'load_existing_model' in sys.argv:
 		s2s.model.summary()
 		try: s2s.model.load_weights(mfile)
 		except: print('\n\nnew model')
 	
-	if 'nogenerator' in sys.argv:
+	if 'sparse' in sys.argv:
 		for epoch in range(0,maxepoches):
 			print('epoch #'+str(epoch))
 
 			adam = Adam(0.001, 0.9, 0.98, epsilon=1e-9)
-			s2s.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
+			s2s.compile(adam)
 
 			s2s.model.fit([Xtrain, Ytrain], None, batch_size=64, epochs=1, \
 					validation_data=([Xvalid, Yvalid], None), \
 					callbacks=[lr_scheduler, model_saver])
-			# K.clear_session()
 
 			parameters = weightsEvolution(s2s, initParams=initParams, zeta=zeta, layers=layers)
 
@@ -77,30 +76,38 @@ if 'sparse' in sys.argv:
 			# get the list of layers to ignore
 			sparseLayersList = getSparseLayersList()
 
-			# K.clear_session()
-
 			# transfer into new model
 			s2s.model = transferModel(s2s.model, model_sparseonlycorrect=s2s_sparseonlycorrect.model, parameters=parameters, mfile=mfile, sparseLayersList=sparseLayersList)
 			
 			# compile this new model again
-			s2s.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
+			s2s.compile(adam)
 
-		
-	elif 'generator' in sys.argv:
+	elif 'originalWithTransfer' in sys.argv:
 		for epoch in range(0,maxepoches):
 			print('epoch #'+str(epoch))
 
-			historytemp = s2s.model.fit_generator(gen, steps_per_epoch=Xtrain.shape[0]//64, epochs=1, callbacks=[lr_scheduler, model_saver])
+			adam = Adam(0.001, 0.9, 0.98, epsilon=1e-9)
+			s2s.compile(adam)
 
-			#ugly hack to avoid tensorflow memory increase for multiple fit_generator calls. Theano shall work more nicely this but it is outdated in general
-			parameters = weightsEvolution(s2s, initParams=initParams, zeta=zeta, layers=layers)
-			K.clear_session()
-			s2s = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
-						n_head=8, d_k=64, d_v=64, layers=layers, dropout=0.1, weightsForSparsity=parameters)
-			s2s.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
-		
+			s2s.model.fit([Xtrain, Ytrain], None, batch_size=64, epochs=1, \
+					validation_data=([Xvalid, Yvalid], None), \
+					callbacks=[lr_scheduler, model_saver])
 
+			# create new Transformer with sparse layers and masked weights
+			s2s_new = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
+						n_head=8, d_k=64, d_v=64, layers=layers, dropout=0.1)
+			# compile the model
+			s2s_new.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
+			
+			# get the list of layers to ignore
+			sparseLayersList = getSparseLayersList()
 
+			# transfer into new model, which is in this case an empty Transformer model to proof transfer correctness
+			s2s.model = transferModel(model_old=s2s.model, model_new=s2s_new.model)
+			
+			# compile this new model again
+			s2s.compile(adam)
 
+	
 
 

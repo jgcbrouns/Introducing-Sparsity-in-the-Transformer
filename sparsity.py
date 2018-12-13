@@ -47,7 +47,6 @@ def find_first_pos(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-
 def find_last_pos(array, value):
     idx = (np.abs(array - value))[::-1].argmin()
     return array.shape[0] - idx
@@ -88,29 +87,6 @@ def getSparseLayersList():
         sparseLayersList.append('sparse_vs_'+str(i))
     return sparseLayersList
 
-
-
-def transferModel(model, model_sparseonlycorrect, parameters, mfile, sparseLayersList):
-
-    # model refers to the old correct and complete model as gained through training in the current epoch
-    # s2s_sparseomodel_sparseonlycorrectnlycorrect refers to a new model created from scratch that only contains 
-    # correct dense encoderlayers that were set in the transformer class
-    # now we have to set the rest
-    print('Transfering model...')
-
-    bar = Bar('Processing', max=len(model_sparseonlycorrect.layer), suffix='%(index)d/%(max)d - %(percent).1f%% - %(eta)ds')
-
-    count = 0
-    for layer in model_sparseonlycorrect.layer:
-        # print(layer.name+'   '+model.layers[count].name)
-        if layer.name not in sparseLayersList:
-            weightsfromlastepoch = model.layers[count].get_weights()
-            layer.set_weights(weightsfromlastepoch)
-        count = count + 1
-        bar.next()
-    bar.finish()
-
-    return model_sparseonlycorrect
 
 
 
@@ -179,19 +155,3 @@ def initSparseWeights(epsilon, n_head, d_k, d_v, layers):
         
     return initParams
 
-
-# def replace_intermediate_layer_in_keras(model, layer_id, new_layer, layer_name='NONAME'):
-#     from keras.models import Model
-
-#     layers = [l for l in model.layers]
-
-#     x = layers[0].output
-#     for i in range(1, len(layers)):
-#         print(layers[i].name)
-#         if layers[i].name == layer_name:
-#             x = new_layer(x)
-#         else:
-#             x = layers[i](x)
-
-#     new_model = Model(input=layers[0].input, output=x)
-#     return new_model

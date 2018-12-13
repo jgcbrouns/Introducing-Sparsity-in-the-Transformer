@@ -75,9 +75,10 @@ class MultiHeadAttention():
 		
 		if mode == 0:
 			
-			if layer_number != None:
+			if layer_number != None and weightsForSparsity != None:
 				
-			
+				print('***SPARSE LOOP***')
+
 				qs_name = 'sparse_qs'
 				ks_name = 'sparse_ks'
 				vs_name = 'sparse_vs'
@@ -95,6 +96,10 @@ class MultiHeadAttention():
 				self.vs_layer = Dense(n_head*d_v, use_bias=False, name=vs_name+'_'+str(layer_number), kernel_constraint=MaskWeights(vs_maskedweights), weights=vs_weights)
 			
 			else: 
+
+				print('***ORIGINAL LOOP***')
+
+				#original code. Executed when there is no weightsForSparsity parameter set (=None)
 				self.qs_layer = Dense(n_head*d_k, use_bias=False)
 				self.ks_layer = Dense(n_head*d_k, use_bias=False)
 				self.vs_layer = Dense(n_head*d_v, use_bias=False)
