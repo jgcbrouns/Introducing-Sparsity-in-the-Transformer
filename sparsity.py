@@ -9,6 +9,8 @@ from keras import backend as K
 from keras.utils import np_utils
 from keras.models import load_model
 import h5py
+import time
+from progress.bar import Bar # sudo pip install progress
 
 class Constraint(object):
 
@@ -96,13 +98,17 @@ def transferModel(model, model_sparseonlycorrect, parameters, mfile, sparseLayer
     # now we have to set the rest
     print('Transfering model...')
 
+    bar = Bar('Processing', max=len(model_sparseonlycorrect.layer), suffix='%(index)d/%(max)d - %(percent).1f%% - %(eta)ds')
+
     count = 0
-    for layer in model_sparseonlycorrect.layers:
+    for layer in model_sparseonlycorrect.layer:
         # print(layer.name+'   '+model.layers[count].name)
         if layer.name not in sparseLayersList:
             weightsfromlastepoch = model.layers[count].get_weights()
             layer.set_weights(weightsfromlastepoch)
         count = count + 1
+        bar.next()
+    bar.finish()
 
     return model_sparseonlycorrect
 
