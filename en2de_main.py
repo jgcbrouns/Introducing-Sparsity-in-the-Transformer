@@ -77,7 +77,7 @@ if 'sparse' in sys.argv:
 			sparseLayersList = getSparseLayersList()
 
 			# transfer into new model
-			s2s.model = transferModel(s2s.model, model_sparseonlycorrect=s2s_sparseonlycorrect.model, parameters=parameters, mfile=mfile, sparseLayersList=sparseLayersList)
+			s2s.model = transferModel(model_old=s2s.model, model_new=s2s_sparseonlycorrect.model, parameters=parameters, mfile=mfile, sparseLayersList=sparseLayersList)
 			
 			# compile this new model again
 			s2s.compile(adam)
