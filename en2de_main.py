@@ -17,7 +17,6 @@ if 'origdata' in sys.argv:
 	Xvalid, Yvalid = dd.MakeS2SData('data/en2de.s2s.valid.txt', itokens, otokens, h5_file='data/en2de.valid.h5')
 	gen = dd.S2SDataGenerator('data/en2de.s2s.txt', itokens, otokens, batch_size=64, max_len=120)
 
-
 print('seq 1 words:', itokens.num())
 print('seq 2 words:', otokens.num())
 print('train shapes:', Xtrain.shape, Ytrain.shape)
@@ -33,28 +32,26 @@ d_model = 512
 d_inner_hid = 512
 layers = 2
 
-if 'sparse' in sys.argv:
-	initParams = initSparseWeights(epsilon, n_head=8, d_k=64, d_v=64, layers=6)
-	s2s = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
-				   n_head=8, d_k=64, d_v=64, layers=2, dropout=0.1, weightsForSparsity=initParams)
-	
-	#compile the model
-	s2s.compile(Adam(0.001, 0.9, 0.98, epsilon=1e-9))
-	
-	mfile = 'models/en2de.model.h5'
+mfile = 'models/en2de.model.h5'
+################ callbacks ################
+# lr_scheduler = LRSchedulerPerStep(d_model, 4000)   # there is a warning that it is slow, however, it's ok.
+lr_scheduler = LRSchedulerPerEpoch(d_model, 4000, Xtrain.shape[0]/64)  # this scheduler only update lr per epoch
+model_saver = ModelCheckpoint(mfile, save_best_only=True, save_weights_only=True)
+###########################################
 
-	################ callbacks ################
-	# lr_scheduler = LRSchedulerPerStep(d_model, 4000)   # there is a warning that it is slow, however, it's ok.
-	lr_scheduler = LRSchedulerPerEpoch(d_model, 4000, Xtrain.shape[0]/64)  # this scheduler only update lr per epoch
-	model_saver = ModelCheckpoint(mfile, save_best_only=True, save_weights_only=True)
-	###########################################
-	
-	if 'load_existing_model' in sys.argv:
-		s2s.model.summary()
-		try: s2s.model.load_weights(mfile)
-		except: print('\n\nnew model')
+if 'sparse' in sys.argv:
 	
 	if 'sparse' in sys.argv:
+
+		initParams = initSparseWeights(epsilon, n_head=8, d_k=64, d_v=64, layers=6)
+		s2s = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
+				   n_head=8, d_k=64, d_v=64, layers=2, dropout=0.1, weightsForSparsity=initParams)
+
+		if 'load_existing_model' in sys.argv:
+			s2s.model.summary()
+			try: s2s.model.load_weights(mfile)
+			except: print('\n\nnew model')
+
 		for epoch in range(0,maxepoches):
 			print('epoch #'+str(epoch))
 
@@ -83,6 +80,15 @@ if 'sparse' in sys.argv:
 			s2s.compile(adam)
 
 	elif 'originalWithTransfer' in sys.argv:
+
+		s2s = Transformer(itokens, otokens, len_limit=70, d_model=d_model, d_inner_hid=d_inner_hid, \
+				   n_head=8, d_k=64, d_v=64, layers=2, dropout=0.1)
+		
+		if 'load_existing_model' in sys.argv:
+			s2s.model.summary()
+			try: s2s.model.load_weights(mfile)
+			except: print('\n\nnew model')
+
 		for epoch in range(0,maxepoches):
 			print('epoch #'+str(epoch))
 
