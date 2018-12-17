@@ -5,27 +5,27 @@ A proof of concept implementation of evolutionary sparsity in the Transformer mo
 
 # How To Run:
 ### Sparse Variant of Transformer
-Sparse variant architecture, trained on the original data (29.000 samples in training set, 1024 samples in test set)
+*Sparse variant architecture, trained on the original data (29.000 samples in training set, 1024 samples in test set)*
 ```
 python3 en2de_main.py sparse origdata
 ```
 ### Original Transformer
-Original architecture with a rewritten trainingsloop and using custom transfer-function in order to validate the obtained results 
+*Original architecture with a rewritten trainingsloop and using custom transfer-function in order to validate the obtained results *
 ```
 python3 en2de_main.py originalWithTransfer origdata
 ```
 ### Flags:
 #### load_existing_model
-Load a saved model and continue training this model
+*Loads the saved model from previous training epochs and continues training this model*
 
 #### Datasets
-Load a saved model and continue training this model.  
-- 'origdata': Use the WMT 2016 German-to-English dataset for training
-- 'testdata': Use a very small subset of the original trainings-task
+*sets the dataset to be used for the trainings-task*
+- **'origdata':** *Use the WMT 2016 German-to-English dataset for training*
+- **'testdata':** *Use a very small subset of the original trainings-task*
 
 
 
-  ## Research papers:
+## Research papers:
 - **The Transformer original paper:**  
 "[Attention is All You Need](https://arxiv.org/abs/1706.03762)" (Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin, arxiv, 2017)
 - **SET-procedure original paper:**  
