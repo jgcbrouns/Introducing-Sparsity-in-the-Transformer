@@ -1,5 +1,5 @@
 
-## Introducing Sparsity in the Transformer model (Keras Implementation)
+# Introducing Sparsity in the Transformer model (Keras Implementation)
 
 A proof of concept implementation of evolutionary sparsity in the Transformer model architecture.  
 
