@@ -34,15 +34,14 @@ python3 en2de_main.py originalWithTransfer origdata
 ## Code based on / uses parts of:
 - **Transformer implementation in Keras by LSdefine:**  
 [The Transformer model in Attention is all you need：a Keras implementation.](https://github.com/Lsdefine/attention-is-all-you-need-keras)
-- **Attention is all you need - A Pytroch implementation**  
+- **Attention is all you need - A Pytorch implementation**  
 [Jadore801120/attention-is-all-you-need-pytorch](https://github.com/jadore801120/attention-is-all-you-need-pytorch).
 - **Sparsity SET-procedure based on the proof-of-concept code of:**   
 [Dr. D.C. Mocanu - TU/e](https://github.com/dcmocanu/sparse-evolutionary-artificial-neural-networks/blob/master/SET-MLP-Keras-Weights-Mask/fixprob_mlp_keras_cifar10.py)
 
 ## F.A.Q
 - The test sys argument gives me error: UnicodeEncodeError: 'ascii' codec can't encode character '\xe4' in position 6: ordinal not in range(128).   
-*Solution:* . 
-run in terminal: ``` 'export LC_CTYPE=C.UTF-8'```
+**Solution:** *run in terminal:* ``` 'export LC_CTYPE=C.UTF-8'```
   
   
 
