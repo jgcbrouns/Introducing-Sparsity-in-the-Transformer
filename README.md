@@ -41,7 +41,7 @@ python3 en2de_main.py originalWithTransfer origdata
 
 ## F.A.Q
 - The test sys argument gives me error: UnicodeEncodeError: 'ascii' codec can't encode character '\xe4' in position 6: ordinal not in range(128).   
-**Solution:** *run in terminal:* ``` 'export LC_CTYPE=C.UTF-8'```
+**Solution:** *run in terminal:* ```export LC_CTYPE=C.UTF-8```
   
   
 
