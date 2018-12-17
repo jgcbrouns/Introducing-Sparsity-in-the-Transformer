@@ -3,17 +3,27 @@
 
 A proof of concept implementation of evolutionary sparsity in the Transformer model architecture.  
 
-## How To Run:
-#### Sparse Variant of Transformer
+# How To Run:
+### Sparse Variant of Transformer
 Sparse variant architecture, trained on the original data (29.000 samples in training set, 1024 samples in test set)
 ```
 python3 en2de_main.py sparse origdata
 ```
-#### Original Transformer
+### Original Transformer
 Original architecture with a rewritten trainingsloop and using custom transfer-function in order to validate the obtained results 
 ```
 python3 en2de_main.py originalWithTransfer origdata
 ```
+### Flags:
+#### load_existing_model
+Load a saved model and continue training this model
+
+#### Datasets
+Load a saved model and continue training this model.  
+- 'origdata': Use the WMT 2016 German-to-English dataset for training
+- 'testdata': Use a very small subset of the original trainings-task
+
+
 
   ## Research papers:
 - **The Transformer original paper:**  
