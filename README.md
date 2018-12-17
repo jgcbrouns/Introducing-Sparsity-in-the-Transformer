@@ -1,9 +1,9 @@
 
-# Introducing Sparsity in the Transformer model (Keras Implementation)
+## Introducing Sparsity in the Transformer model (Keras Implementation)
 
 A proof of concept implementation of evolutionary sparsity in the Transformer model architecture.  
 
-# How To Run:
+## How To Run:
 ### Sparse Variant of Transformer
 *Sparse variant architecture, trained on the original data (29.000 samples in training set, 1024 samples in test set)*
 ```
