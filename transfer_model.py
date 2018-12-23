@@ -12,10 +12,10 @@ def transferModel(model_old, model_new, parameters=None, mfile=None, sparseLayer
     # now we have to set the rest
     print('Transfering model...')
 
-    bar = Bar('Processing', max=len(model_new.layer), suffix='%(index)d/%(max)d - %(percent).1f%% - %(eta)ds')
+    bar = Bar('Processing', max=len(model_new.layers), suffix='%(index)d/%(max)d - %(percent).1f%% - %(eta)ds')
 
     count = 0
-    for layer in model_new.layer:
+    for layer in model_new.layers:
         # print(layer.name+'   '+model.layers[count].name)
         if layer.name not in sparseLayersList:
             weightsfromlastepoch = model_old.layers[count].get_weights()
