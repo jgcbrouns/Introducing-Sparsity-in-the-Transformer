@@ -25,6 +25,7 @@ max_len=120
 ###################################################
 
 model_parameters = {'maxepoches': maxepoches, 'epsilon':epsilon, 'zeta':zeta, 'd_model':d_model, 'd_inner_hid':d_inner_hid, 'layers':layers, 'n_head':n_head, 'd_k':d_k, 'd_v':d_v, 'len_limit':len_limit, 'dropout':dropout, 'batch_size':batch_size, 'max_len':max_len}
+filepath = createHistoryFile(model_parameters, sys.argv)
 
 ############### Load trainingsdata ################
 if 'testdata' in sys.argv:
@@ -75,8 +76,6 @@ if 'sparse' in sys.argv:
 	else:
 		print('*** New model ***')
 
-	filepath = createHistoryFile(model_parameters, sys.argv)
-
 	for epoch in range(0,maxepoches):
 		print('epoch #'+str(epoch))
 
@@ -124,7 +123,7 @@ elif 'originalWithTransfer' in sys.argv:
 				validation_data=([Xvalid, Yvalid], None), \
 				callbacks=[lr_scheduler, model_saver])
 
-		print(history)
+		writeEpochHistoryToDisk(history, filepath)
 
 		# create new Transformer with sparse layers and masked weights
 		s2s_new = Transformer(itokens, otokens, len_limit=len_limit, d_model=d_model, d_inner_hid=d_inner_hid, \
@@ -145,10 +144,10 @@ elif 'originalImplementation' in sys.argv:
 	s2s.compile(adam)
 	s2s.model.summary()
 
-	s2s.model.fit([Xtrain, Ytrain], None, batch_size=64, epochs=30, \
+	history = s2s.model.fit([Xtrain, Ytrain], None, batch_size=batch_size, epochs=maxepoches, \
 				validation_data=([Xvalid, Yvalid], None), \
 				callbacks=[lr_scheduler, model_saver])
 
-
+	writeEpochHistoryToDisk(history, filepath)
 
 
